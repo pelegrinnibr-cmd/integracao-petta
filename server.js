@@ -10,9 +10,9 @@ app.post('/criar-pagamento', async (req, res) => {
   const response = await fetch('https://api.petta.me/payments', {
     method: 'POST',
     headers: {
-      'Authorization': 'Bearer SUA_API_KEY',
-      'Content-Type': 'application/json'
-    },
+  'Authorization': 'Bearer sk_16fff82e3735bb91b2425c88ec703d549d362267bf61937d',
+  'Content-Type': 'application/json'
+}
     body: JSON.stringify({
       amount: dados.valor,
       customer: {

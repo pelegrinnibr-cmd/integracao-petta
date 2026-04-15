@@ -1,11 +1,17 @@
 const express = require('express');
-const fetch = require('node-fetch');
 
 const app = express();
 app.use(express.json());
 
 /**
- * ROTA PARA CRIAR PAGAMENTO (TESTE DIRETO NO NAVEGADOR)
+ * ROTA TESTE (abre no navegador)
+ */
+app.get('/', (req, res) => {
+  res.send('API rodando 🚀');
+});
+
+/**
+ * CRIAR PAGAMENTO (TESTE)
  */
 app.get('/criar-pagamento', async (req, res) => {
   try {
@@ -16,7 +22,7 @@ app.get('/criar-pagamento', async (req, res) => {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        amount: 100, // R$1,00 (em centavos)
+        amount: 100,
         payment_method: 'pix',
         customer: {
           name: 'Teste',
@@ -27,8 +33,8 @@ app.get('/criar-pagamento', async (req, res) => {
     });
 
     const data = await response.json();
-    console.log(data);
 
+    console.log(data);
     res.json(data);
 
   } catch (error) {
@@ -38,16 +44,18 @@ app.get('/criar-pagamento', async (req, res) => {
 });
 
 /**
- * WEBHOOK (RECEBE CONFIRMAÇÃO DE PAGAMENTO)
+ * WEBHOOK
  */
 app.post('/webhook', (req, res) => {
-  console.log('Webhook recebido:', req.body);
+  console.log('Webhook:', req.body);
   res.sendStatus(200);
 });
 
 /**
- * SERVIDOR
+ * SERVIDOR (IMPORTANTE PRO RENDER)
  */
-app.listen(3000, () => {
-  console.log('Rodando na porta 3000');
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+  console.log('Rodando na porta', PORT);
 });

@@ -1,11 +1,21 @@
+const express = require('express');
+const fetch = require('node-fetch');
+
+const app = express();
+app.use(express.json());
+
+// TESTE
+app.get('/', (req, res) => {
+  res.send('API rodando 🚀');
+});
+
+// YAMPI WEBHOOK
 app.post('/yampi/order', async (req, res) => {
   try {
     const order = req.body;
 
-    console.log("🔥 PEDIDO RECEBIDO DA YAMPI:");
-    console.log(JSON.stringify(order, null, 2));
+    console.log("🔥 PEDIDO DA YAMPI:", order);
 
-    // aqui você vai criar o PIX na Petta
     const response = await fetch('https://api.petta.me/transactions', {
       method: 'POST',
       headers: {
@@ -13,7 +23,7 @@ app.post('/yampi/order', async (req, res) => {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        amount: Math.round((order.total || order.amount) * 100),
+        amount: Math.round((order.total || 100) * 100),
         method: "PIX",
         metadata: {
           yampiOrderId: order.id
@@ -23,12 +33,12 @@ app.post('/yampi/order', async (req, res) => {
           email: order.customer?.email || "teste@gmail.com",
           phone: order.customer?.phone || "11999999999",
           documentType: "CPF",
-          document: order.customer?.document || "12345678900"
+          document: "12345678900"
         },
         items: [
           {
             title: "Pedido Yampi",
-            amount: Math.round((order.total || order.amount) * 100),
+            amount: Math.round((order.total || 100) * 100),
             quantity: 1,
             tangible: false
           }
@@ -38,8 +48,7 @@ app.post('/yampi/order', async (req, res) => {
 
     const pix = await response.json();
 
-    console.log("💰 PIX GERADO:");
-    console.log(pix);
+    console.log("💰 PIX GERADO:", pix);
 
     res.status(200).send({
       success: true,
@@ -48,6 +57,19 @@ app.post('/yampi/order', async (req, res) => {
 
   } catch (error) {
     console.log("❌ ERRO:", error);
-    res.status(500).send("erro webhook");
+    res.status(500).send("erro");
   }
+});
+
+// WEBHOOK PETTA
+app.post('/webhook', (req, res) => {
+  console.log('🔥 PETTA WEBHOOK:', req.body);
+  res.sendStatus(200);
+});
+
+// SERVER
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+  console.log('Rodando na porta', PORT);
 });

@@ -15,7 +15,7 @@ app.get('/', (req, res) => {
  */
 app.get('/criar-pagamento', async (req, res) => {
   try {
-    const response = await fetch('https://api.petta.me/v1/transactions', {
+    const response = await fetch('https://api.petta.me/payments', {
       method: 'POST',
       headers: {
         'Authorization': 'Bearer sk_16fff82e3735bb91b2425c88ec703d549d362267bf61937d',

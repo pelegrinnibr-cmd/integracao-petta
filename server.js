@@ -12,11 +12,11 @@ app.get('/', (req, res) => {
 });
 
 /**
- * CRIAR PAGAMENTO
+ * CRIAR PAGAMENTO (PETTA)
  */
 app.get('/criar-pagamento', async (req, res) => {
   try {
-    const response = await fetch('https://api.petta.me/payments', {
+    const response = await fetch('https://api.petta.me/v1/payments', {
       method: 'POST',
       headers: {
         'Authorization': 'Bearer sk_16fff82e3735bb91b2425c88ec703d549d362267bf61937d',
@@ -24,7 +24,7 @@ app.get('/criar-pagamento', async (req, res) => {
       },
       body: JSON.stringify({
         amount: 100,
-        method: 'pix',
+        payment_method: 'pix',
         customer: {
           name: 'Teste',
           document: '12345678900'
@@ -47,12 +47,12 @@ app.get('/criar-pagamento', async (req, res) => {
  * WEBHOOK
  */
 app.post('/webhook', (req, res) => {
-  console.log('Webhook:', req.body);
+  console.log('Webhook recebido:', req.body);
   res.sendStatus(200);
 });
 
 /**
- * SERVIDOR
+ * SERVIDOR (RENDER)
  */
 const PORT = process.env.PORT || 3000;
 

@@ -1,43 +1,67 @@
 const express = require('express');
-const fetch = require('node-fetch');
+const fetch = require('node-fetch'); // <- IMPORTANTE
 
 const app = express();
 app.use(express.json());
 
-/**
- * ROTA RAIZ (TESTE)
- */
+// ROTA TESTE
 app.get('/', (req, res) => {
   res.send('API rodando 🚀');
 });
 
-/**
- * TESTE DA API PETTA (IMPORTANTE)
- */
-app.get('/teste-petta', async (req, res) => {
+// CRIAR PIX NA PETTA
+app.post('/criar-pagamento', async (req, res) => {
   try {
-    const response = await fetch('https://api.petta.me', {
-      method: 'GET',
+    const response = await fetch('https://api.petta.me/transactions', {
+      method: 'POST',
       headers: {
-        'Authorization': 'Bearer sk_16fff82e3735bb91b2425c88ec703d549d362267bf61937d'
-      }
+        'Content-Type': 'application/json',
+        'x-api-key': 'SUA_API_KEY_AQUI' // troca depois
+      },
+      body: JSON.stringify({
+        amount: 500,
+        method: "PIX",
+        metadata: {
+          sellerExternalRef: "teste123"
+        },
+        customer: {
+          name: "Teste",
+          email: "teste@email.com",
+          phone: "11999999999",
+          documentType: "CPF",
+          document: "12345678900"
+        },
+        items: [
+          {
+            title: "Pagamento teste",
+            amount: 500,
+            quantity: 1,
+            tangible: false,
+            externalRef: "item_1"
+          }
+        ]
+      })
     });
 
-    const text = await response.text();
+    const data = await response.json();
 
-    console.log('RESPOSTA PETTA:', text);
+    console.log(data);
 
-    res.send(text);
+    return res.json(data);
 
   } catch (error) {
-    console.log('ERRO:', error);
-    res.status(500).send(error.toString());
+    console.log(error);
+    return res.status(500).json({ error: 'Erro ao criar pagamento' });
   }
 });
 
-/**
- * SERVIDOR (RENDER)
- */
+// WEBHOOK
+app.post('/webhook', (req, res) => {
+  console.log('WEBHOOK RECEBIDO:', req.body);
+  res.sendStatus(200);
+});
+
+// PORT (RENDER)
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {

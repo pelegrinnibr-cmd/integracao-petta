@@ -1,19 +1,3 @@
-const express = require('express');
-const fetch = require('node-fetch'); // IMPORTANTE
-
-const app = express();
-app.use(express.json());
-
-/**
- * ROTA RAIZ (TESTE)
- */
-app.get('/', (req, res) => {
-  res.send('API rodando 🚀');
-});
-
-/**
- * CRIAR PAGAMENTO (PIX)
- */
 app.get('/criar-pagamento', async (req, res) => {
   try {
     const response = await fetch('https://api.petta.me/payments', {
@@ -23,40 +7,22 @@ app.get('/criar-pagamento', async (req, res) => {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        amount: 100, // R$1,00
-        payment_method: 'pix',
+        amount: 100,
+        method: 'pix',
         customer: {
           name: 'Teste',
-          email: 'teste@email.com',
           document: '12345678900'
         }
       })
     });
 
-    const data = await response.json();
+    const text = await response.text(); // IMPORTANTE
+    console.log(text);
 
-    console.log('RESPOSTA PETTA:', data);
-    res.json(data);
+    res.send(text);
 
   } catch (error) {
-    console.log('ERRO:', error);
+    console.log(error);
     res.status(500).send('Erro ao criar pagamento');
   }
-});
-
-/**
- * WEBHOOK
- */
-app.post('/webhook', (req, res) => {
-  console.log('Webhook recebido:', req.body);
-  res.sendStatus(200);
-});
-
-/**
- * PORTA (RENDER)
- */
-const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, () => {
-  console.log('Rodando na porta', PORT);
 });

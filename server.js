@@ -1,69 +1,53 @@
-const express = require('express');
-const fetch = require('node-fetch');
-
-const app = express();
-app.use(express.json());
-
-// TESTE
-app.get('/', (req, res) => {
-  res.send('API rodando 🚀');
-});
-
-// CRIAR PAGAMENTO NA PETTA
-app.get('/criar-pagamento', async (req, res) => {
+app.post('/yampi/order', async (req, res) => {
   try {
+    const order = req.body;
+
+    console.log("🔥 PEDIDO RECEBIDO DA YAMPI:");
+    console.log(JSON.stringify(order, null, 2));
+
+    // aqui você vai criar o PIX na Petta
     const response = await fetch('https://api.petta.me/transactions', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': 'sk_16fff82e3735bb91b2425c88ec703d549d362267bf61937d'
+        'x-api-key': 'sk_16fff82e3735bb91b2425c88ec703d549d362267bf61937d',
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        amount: 500,
+        amount: Math.round((order.total || order.amount) * 100),
         method: "PIX",
         metadata: {
-          sellerExternalRef: "teste123"
+          yampiOrderId: order.id
         },
         customer: {
-          name: "Teste",
-          email: "teste@email.com",
-          phone: "11999999999",
+          name: order.customer?.name || "Cliente",
+          email: order.customer?.email || "teste@gmail.com",
+          phone: order.customer?.phone || "11999999999",
           documentType: "CPF",
-          document: "12345678900"
+          document: order.customer?.document || "12345678900"
         },
         items: [
           {
-            title: "Pagamento teste",
-            amount: 500,
+            title: "Pedido Yampi",
+            amount: Math.round((order.total || order.amount) * 100),
             quantity: 1,
-            tangible: false,
-            externalRef: "item_1"
+            tangible: false
           }
         ]
       })
     });
 
-    const data = await response.json();
+    const pix = await response.json();
 
-    console.log('RESPOSTA PETTA:', data);
+    console.log("💰 PIX GERADO:");
+    console.log(pix);
 
-    return res.json(data);
+    res.status(200).send({
+      success: true,
+      pix: pix?.data?.pix?.qrcodeUrl
+    });
 
   } catch (error) {
-    console.log('ERRO:', error);
-    return res.status(500).json({ error: 'Erro ao criar pagamento' });
+    console.log("❌ ERRO:", error);
+    res.status(500).send("erro webhook");
   }
-});
-
-// WEBHOOK (Petta vai chamar isso depois)
-app.post('/webhook', (req, res) => {
-  console.log('WEBHOOK RECEBIDO:', req.body);
-  res.sendStatus(200);
-});
-
-// PORTA DO RENDER
-const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, () => {
-  console.log('Rodando na porta', PORT);
 });

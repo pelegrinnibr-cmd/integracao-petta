@@ -1,5 +1,5 @@
 const express = require('express');
-const fetch = require('node-fetch'); // <- IMPORTANTE
+const fetch = require('node-fetch');
 
 const app = express();
 app.use(express.json());
@@ -9,14 +9,14 @@ app.get('/', (req, res) => {
   res.send('API rodando 🚀');
 });
 
-// CRIAR PIX NA PETTA
+// CRIAR PIX NA PETTA (CORRETO)
 app.post('/criar-pagamento', async (req, res) => {
   try {
     const response = await fetch('https://api.petta.me/transactions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-api-key': 'SUA_API_KEY_AQUI' // troca depois
+        'x-api-key': 'sk_16fff82e3735bb91b2425c88ec703d549d362267bf61937d'
       },
       body: JSON.stringify({
         amount: 500,
@@ -51,17 +51,20 @@ app.post('/criar-pagamento', async (req, res) => {
 
   } catch (error) {
     console.log(error);
-    return res.status(500).json({ error: 'Erro ao criar pagamento' });
+    return res.status(500).json({
+      error: 'Erro ao criar pagamento',
+      details: error.message
+    });
   }
 });
 
-// WEBHOOK
+// WEBHOOK (Petta chama aqui depois)
 app.post('/webhook', (req, res) => {
   console.log('WEBHOOK RECEBIDO:', req.body);
   res.sendStatus(200);
 });
 
-// PORT (RENDER)
+// PORT RENDER
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {

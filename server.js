@@ -4,13 +4,13 @@ const fetch = require('node-fetch');
 const app = express();
 app.use(express.json());
 
-// ROTA TESTE
+// TESTE
 app.get('/', (req, res) => {
   res.send('API rodando 🚀');
 });
 
-// CRIAR PIX NA PETTA (CORRETO)
-app.post('/criar-pagamento', async (req, res) => {
+// CRIAR PAGAMENTO NA PETTA
+app.get('/criar-pagamento', async (req, res) => {
   try {
     const response = await fetch('https://api.petta.me/transactions', {
       method: 'POST',
@@ -45,26 +45,23 @@ app.post('/criar-pagamento', async (req, res) => {
 
     const data = await response.json();
 
-    console.log(data);
+    console.log('RESPOSTA PETTA:', data);
 
     return res.json(data);
 
   } catch (error) {
-    console.log(error);
-    return res.status(500).json({
-      error: 'Erro ao criar pagamento',
-      details: error.message
-    });
+    console.log('ERRO:', error);
+    return res.status(500).json({ error: 'Erro ao criar pagamento' });
   }
 });
 
-// WEBHOOK (Petta chama aqui depois)
+// WEBHOOK (Petta vai chamar isso depois)
 app.post('/webhook', (req, res) => {
   console.log('WEBHOOK RECEBIDO:', req.body);
   res.sendStatus(200);
 });
 
-// PORT RENDER
+// PORTA DO RENDER
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {

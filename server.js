@@ -5,50 +5,34 @@ const app = express();
 app.use(express.json());
 
 /**
- * ROTA RAIZ
+ * ROTA RAIZ (TESTE)
  */
 app.get('/', (req, res) => {
   res.send('API rodando 🚀');
 });
 
 /**
- * CRIAR PAGAMENTO (PETTA)
+ * TESTE DA API PETTA (IMPORTANTE)
  */
-app.get('/criar-pagamento', async (req, res) => {
+app.get('/teste-petta', async (req, res) => {
   try {
-    const response = await fetch('https://api.petta.me/v1/payments', {
-      method: 'POST',
+    const response = await fetch('https://api.petta.me', {
+      method: 'GET',
       headers: {
-        'Authorization': 'Bearer sk_16fff82e3735bb91b2425c88ec703d549d362267bf61937d',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        amount: 100,
-        payment_method: 'pix',
-        customer: {
-          name: 'Teste',
-          document: '12345678900'
-        }
-      })
+        'Authorization': 'Bearer sk_16fff82e3735bb91b2425c88ec703d549d362267bf61937d'
+      }
     });
 
     const text = await response.text();
+
     console.log('RESPOSTA PETTA:', text);
 
     res.send(text);
 
   } catch (error) {
     console.log('ERRO:', error);
-    res.status(500).send('Erro ao criar pagamento');
+    res.status(500).send(error.toString());
   }
-});
-
-/**
- * WEBHOOK
- */
-app.post('/webhook', (req, res) => {
-  console.log('Webhook recebido:', req.body);
-  res.sendStatus(200);
 });
 
 /**

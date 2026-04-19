@@ -1,44 +1,52 @@
+git config --global user.name "Guilherme"
+git config --global user.email "pelegrinnibr@gmail.com"
+
+
+Conta dolar - bottega
+Conta dolar - Guilherme Azevedo
+Conta dolar - João Souza - 12$
+
+
 const express = require('express');
-const fetch = require('node-fetch');
+const cors = require('cors');
 
 const app = express();
+
+app.use(cors());
 app.use(express.json());
 
-// TESTE
+const API_KEY = "sk_16fff82e3735bb91b2425c88ec703d549d362267bf61937d";
+
+// rota teste
 app.get('/', (req, res) => {
-  res.send('API rodando 🚀');
+  res.send('Servidor rodando 🚀');
 });
 
-// YAMPI WEBHOOK
-app.post('/yampi/order', async (req, res) => {
+// rota checkout
+app.post('/checkout', async (req, res) => {
   try {
-    const order = req.body;
+    const { amount, method, customer } = req.body;
 
-    console.log("🔥 PEDIDO DA YAMPI:", order);
-
-    const response = await fetch('https://api.petta.me/transactions', {
+    const response = await fetch('https://api.petta.com/v1/transactions', {
       method: 'POST',
       headers: {
-        'x-api-key': 'sk_16fff82e3735bb91b2425c88ec703d549d362267bf61937d',
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${API_KEY}`
       },
       body: JSON.stringify({
-        amount: Math.round((order.total || 100) * 100),
-        method: "PIX",
-        metadata: {
-          yampiOrderId: order.id
-        },
+        amount: amount,
+        method: method,
         customer: {
-          name: order.customer?.name || "Cliente",
-          email: order.customer?.email || "teste@gmail.com",
-          phone: order.customer?.phone || "11999999999",
+          name: customer.name,
+          email: customer.email,
+          phone: "11999999999",
           documentType: "CPF",
           document: "12345678900"
         },
         items: [
           {
-            title: "Pedido Yampi",
-            amount: Math.round((order.total || 100) * 100),
+            title: "Produto Teste",
+            amount: amount,
             quantity: 1,
             tangible: false
           }
@@ -46,30 +54,23 @@ app.post('/yampi/order', async (req, res) => {
       })
     });
 
-    const pix = await response.json();
+    const data = await response.json();
 
-    console.log("💰 PIX GERADO:", pix);
+    if (method === "PIX") {
+      return res.json({
+        success: true,
+        pix: data?.data?.pix?.copyPaste || null
+      });
+    }
 
-    res.status(200).send({
-      success: true,
-      pix: pix?.data?.pix?.qrcodeUrl
-    });
+    res.json({ success: false });
 
   } catch (error) {
-    console.log("❌ ERRO:", error);
-    res.status(500).send("erro");
+    console.error(error);
+    res.status(500).json({ error: "Erro interno" });
   }
 });
 
-// WEBHOOK PETTA
-app.post('/webhook', (req, res) => {
-  console.log('🔥 PETTA WEBHOOK:', req.body);
-  res.sendStatus(200);
-});
-
-// SERVER
-const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, () => {
-  console.log('Rodando na porta', PORT);
+app.listen(3000, () => {
+  console.log('Servidor rodando na porta 3000');
 });

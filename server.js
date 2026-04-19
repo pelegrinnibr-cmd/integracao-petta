@@ -1,20 +1,13 @@
-git config --global user.name "Guilherme"
-git config --global user.email "pelegrinnibr@gmail.com"
-
-
-Conta dolar - bottega
-Conta dolar - Guilherme Azevedo
-Conta dolar - João Souza - 12$
-
-
 const express = require('express');
 const cors = require('cors');
+const fetch = require('node-fetch');
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 
+// 🔑 COLOCA SUA CHAVE AQUI
 const API_KEY = "sk_16fff82e3735bb91b2425c88ec703d549d362267bf61937d";
 
 // rota teste
@@ -56,6 +49,7 @@ app.post('/checkout', async (req, res) => {
 
     const data = await response.json();
 
+    // retorno PIX
     if (method === "PIX") {
       return res.json({
         success: true,
@@ -63,7 +57,7 @@ app.post('/checkout', async (req, res) => {
       });
     }
 
-    res.json({ success: false });
+    return res.json({ success: false, error: "Método inválido" });
 
   } catch (error) {
     console.error(error);
